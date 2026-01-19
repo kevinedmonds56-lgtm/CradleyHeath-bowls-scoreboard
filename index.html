@@ -1,191 +1,155 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Crown Green Bowls Scoreboard</title>
+<style>
+    body { 
+        font-family: Arial, sans-serif; 
+        padding: 2rem; 
+        background: #0b3d0b;
+        color: #fff;
+        font-size: 1.4rem;
+    }
 
-    <!-- Essential for correct scaling on Android & iPhone -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    h2 {
+        font-size: 3rem;
+        font-weight: 900;
+        text-align: center;
+        margin-bottom: 1rem;
+        color: #ffffff;
+    }
 
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            padding: 2rem; 
-            background: #0b3d0b;
-            color: #fff;
-            font-size: 1.4rem;
+    #fullscreenBtn,
+    #hideControlsBtn,
+    #tvModeBtn,
+    #printBtn {
+        padding: 1rem 2rem;
+        font-size: 1.4rem;
+        font-weight: bold;
+        background: #1e7f1e;
+        color: white;
+        border: 0.2rem solid white;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        margin-right: 0.6rem;
+    }
+
+    #exitTvFloating {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        padding: 1rem 1.6rem;
+        font-size: 1.4rem;
+        font-weight: bold;
+        background: #b22222;
+        color: white;
+        border: 0.2rem solid white;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        display: none;
+        z-index: 99999;
+    }
+
+    #showControlsBtn {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.8rem 1.2rem;
+        font-size: 1.4rem;
+        background: #1e7f1e;
+        color: white;
+        border: 0.2rem solid white;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        display: none;
+        z-index: 9999;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        font-size: 1.4rem;
+        background: #145214;
+        min-width: 96vw;
+    }
+
+    table, th, td {
+        border: 0.2rem solid #fff;
+    }
+
+    th, td {
+        padding: 0.6rem;
+        text-align: center;
+    }
+
+    th {
+        background: #1e7f1e;
+        color: white;
+    }
+
+    .scoreCol {
+        width: 10vw;
+    }
+
+    input[type="text"], input[type="number"] {
+        font-size: 1.4rem;
+        padding: 0.6rem;
+        width: 95%;
+        box-sizing: border-box;
+        border-radius: 0.4rem;
+        border: 0.2rem solid #ccc;
+    }
+
+    #homeTeamName, #awayTeamName {
+        width: 28vw;
+        padding: 0.8rem;
+        font-size: 1.6rem;
+    }
+
+    select {
+        font-size: 1.6rem;
+        padding: 0.8rem;
+    }
+
+    .btn {
+        padding: 1.2rem 2.4rem;
+        margin-right: 1rem;
+        cursor: pointer;
+        font-size: 2rem;
+        font-weight: bold;
+        border-radius: 0.6rem;
+        background: #1e7f1e;
+        color: white;
+        border: 0.2rem solid white;
+    }
+
+    #totalsRow {
+        font-size: 2rem;
+        font-weight: 900;
+        background: #0a2f0a;
+        padding: 1rem;
+        color: #ffffff;
+        border-top: 0.4rem solid white;
+    }
+
+    /* Scaling wrapper (S2 + W2) */
+    #scaleWrapper {
+        width: 100%;
+        transform-origin: top left;
+    }
+
+    /* Landscape fix (L3) */
+    @media screen and (orientation: landscape) {
+        #scaleWrapper {
+            transform: scale(0.72);
+            width: 138vw;
         }
+    }
 
-        h2 {
-            font-size: 3rem;
-            font-weight: 900;
-            text-align: center;
-            margin-bottom: 1rem;
-            color: #ffffff;
-        }
-
-        /* Top control buttons */
-        #fullscreenBtn,
-        #hideControlsBtn,
-        #tvModeBtn,
-        #printBtn {
-            padding: 1rem 2rem;
-            font-size: 1.4rem;
-            font-weight: bold;
-            background: #1e7f1e;
-            color: white;
-            border: 0.2rem solid white;
-            border-radius: 0.6rem;
-            cursor: pointer;
-            margin-bottom: 1rem;
-            margin-right: 0.6rem;
-        }
-
-        /* Floating Exit TV Mode button */
-        #exitTvFloating {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            padding: 1rem 1.6rem;
-            font-size: 1.4rem;
-            font-weight: bold;
-            background: #b22222;
-            color: white;
-            border: 0.2rem solid white;
-            border-radius: 0.6rem;
-            cursor: pointer;
-            display: none;
-            z-index: 99999;
-        }
-
-        /* Floating Show Controls button */
-        #showControlsBtn {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            padding: 0.8rem 1.2rem;
-            font-size: 1.4rem;
-            background: #1e7f1e;
-            color: white;
-            border: 0.2rem solid white;
-            border-radius: 0.6rem;
-            cursor: pointer;
-            display: none;
-            z-index: 9999;
-        }
-
-        /* Table layout */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            font-size: 1.4rem;
-            background: #145214;
-            min-width: 96vw;
-        }
-
-        table, th, td {
-            border: 0.2rem solid #fff;
-        }
-
-        th, td {
-            padding: 0.6rem;
-            text-align: center;
-        }
-
-        th {
-            background: #1e7f1e;
-            color: white;
-        }
-
-        .scoreCol {
-            width: 10vw;
-        }
-
-        /* Inputs */
-        input[type="text"], input[type="number"] {
-            font-size: 1.4rem;
-            padding: 0.6rem;
-            width: 95%;
-            box-sizing: border-box;
-            border-radius: 0.4rem;
-            border: 0.2rem solid #ccc;
-        }
-
-        #homeTeamName, #awayTeamName {
-            width: 28vw;
-            padding: 0.8rem;
-            font-size: 1.6rem;
-        }
-
-        select {
-            font-size: 1.6rem;
-            padding: 0.8rem;
-        }
-
-        /* Row buttons */
-        table .btn {
-            padding: 0.6rem 1.2rem;
-            font-size: 1.4rem;
-            margin-right: 0.4rem;
-            border-radius: 0.6rem;
-            background: #1e7f1e;
-            color: white;
-            border: 0.2rem solid white;
-            cursor: pointer;
-        }
-
-        /* Main buttons */
-        .btn {
-            padding: 1.2rem 2.4rem;
-            margin-right: 1rem;
-            cursor: pointer;
-            font-size: 2rem;
-            font-weight: bold;
-            border-radius: 0.6rem;
-            background: #1e7f1e;
-            color: white;
-            border: 0.2rem solid white;
-        }
-
-        /* Totals bar */
-        #totalsRow {
-            font-size: 2rem;
-            font-weight: 900;
-            background: #0a2f0a;
-            padding: 1rem;
-            color: #ffffff;
-            border-top: 0.4rem solid white;
-        }
-
-        /* TV MODE */
-        .tv-mode {
-            zoom: 1.18; /* tuned for 48-inch and below */
-        }
-
-        .tv-mode #topControls {
-            display: none !important;
-        }
-
-        .tv-mode #showControlsBtn {
-            display: none !important;
-        }
-
-        .tv-mode #scoreTable {
-            margin-top: 2rem;
-            font-size: 2rem;
-        }
-
-        .tv-mode th, .tv-mode td {
-            padding: 1rem;
-        }
-
-        .tv-mode h2 {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-    </style>
-</head>
-
+    /* TV Mode +10% boost (T2-A) */
+    .tv-mode #scaleWrapper {
+        transform: scale(0.79);
+        width: 152vw;
+    }
+</style>
 <body>
 
 <h2>Crown Green Bowls Scoreboard</h2>
@@ -231,8 +195,12 @@
 
 </div>
 
-<table id="scoreTable"></table>
+<!-- Scaling wrapper around the entire match grid (S2 + P1) -->
+<div id="scaleWrapper">
+    <table id="scoreTable"></table>
+</div>
 
+</body>
 <script>
 let totalHome = 0;
 let totalAway = 0;
@@ -241,19 +209,16 @@ let awayTeamHeading = "Away Team";
 let savedRows = {};
 let lastMatchSize = 6;
 
-/* Hide Controls */
 function hideControls() {
     document.getElementById("topControls").style.display = "none";
     document.getElementById("showControlsBtn").style.display = "inline-block";
 }
 
-/* Show Controls */
 function showControls() {
     document.getElementById("topControls").style.display = "block";
     document.getElementById("showControlsBtn").style.display = "none";
 }
 
-/* Fullscreen toggle */
 function toggleFullscreen() {
     if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen();
@@ -264,7 +229,6 @@ function toggleFullscreen() {
     }
 }
 
-/* Update Home Team Name */
 function updateHomeTeamName() {
     let dropdown = document.getElementById("homeTeamSelect").value;
     let textBox = document.getElementById("homeTeamName");
@@ -280,7 +244,6 @@ function updateHomeTeamName() {
     if (headingCell) headingCell.innerText = homeTeamHeading;
 }
 
-/* Update Away Team Name */
 function updateAwayTeamName() {
     awayTeamHeading = document.getElementById("awayTeamName").value;
 
@@ -288,7 +251,6 @@ function updateAwayTeamName() {
     if (headingCell) headingCell.innerText = awayTeamHeading;
 }
 
-/* Create Match Grid */
 function createGrid(games) {
 
     if (homeTeamHeading.trim() === "" || awayTeamHeading.trim() === "") {
@@ -344,7 +306,6 @@ function createGrid(games) {
     `;
 }
 
-/* Save Score */
 function saveScore(game) {
     if (savedRows[game]) return;
 
@@ -374,7 +335,6 @@ function saveScore(game) {
         `Running Totals: Home: ${totalHome} &nbsp;&nbsp;&nbsp; Away: ${totalAway}`;
 }
 
-/* Clear Row */
 function clearRow(game) {
     if (savedRows[game]) {
         let home = parseInt(document.getElementById("homeScore" + game).value) || 0;
@@ -401,7 +361,6 @@ function clearRow(game) {
         `Running Totals: Home: ${totalHome} &nbsp;&nbsp;&nbsp; Away: ${totalAway}`;
 }
 
-/* Reset Match */
 function resetMatch() {
     totalHome = 0;
     totalAway = 0;
@@ -413,7 +372,6 @@ function resetMatch() {
     createGrid(lastMatchSize);
 }
 
-/* TV MODE */
 function enterTvMode() {
     document.documentElement.classList.add("tv-mode");
     document.getElementById("exitTvFloating").style.display = "inline-block";
@@ -424,7 +382,6 @@ function exitTvMode() {
     document.getElementById("exitTvFloating").style.display = "none";
 }
 
-/* Printable Match Sheet */
 function printMatchSheet() {
     if (!document.getElementById("scoreTable").innerHTML.trim()) {
         alert("Please create a match grid before printing.");
@@ -493,6 +450,3 @@ function printMatchSheet() {
     win.print();
 }
 </script>
-
-</body>
-</html>
