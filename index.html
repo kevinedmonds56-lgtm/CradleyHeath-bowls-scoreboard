@@ -1,4 +1,350 @@
-/* Save Score with auto-highlight */
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crown Green Bowls Scoreboard</title>
+
+    <!-- Essential for correct scaling on Android & iPhone -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 2rem; 
+            background: #0b3d0b;
+            color: #fff;
+            font-size: 1.4rem;
+        }
+
+        h2 {
+            font-size: 3rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        /* Top control buttons */
+        #fullscreenBtn,
+        #hideControlsBtn,
+        #tvModeBtn,
+        #printBtn {
+            padding: 1rem 2rem;
+            font-size: 1.4rem;
+            font-weight: bold;
+            background: #1e7f1e;
+            color: white;
+            border: 0.2rem solid white;
+            border-radius: 0.6rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            margin-right: 0.6rem;
+        }
+
+        /* Floating Exit TV Mode button */
+        #exitTvFloating {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem 1.6rem;
+            font-size: 1.4rem;
+            font-weight: bold;
+            background: #b22222;
+            color: white;
+            border: 0.2rem solid white;
+            border-radius: 0.6rem;
+            cursor: pointer;
+            display: none;
+            z-index: 99999;
+        }
+
+        /* Floating Show Controls button */
+        #showControlsBtn {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.8rem 1.2rem;
+            font-size: 1.4rem;
+            background: #1e7f1e;
+            color: white;
+            border: 0.2rem solid white;
+            border-radius: 0.6rem;
+            cursor: pointer;
+            display: none;
+            z-index: 9999;
+        }
+
+        /* Table layout */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 1.4rem;
+            background: #145214;
+            min-width: 96vw;
+        }
+
+        table, th, td {
+            border: 0.2rem solid #fff;
+        }
+
+        th, td {
+            padding: 0.6rem;
+            text-align: center;
+        }
+
+        th {
+            background: #1e7f1e;
+            color: white;
+        }
+
+        .scoreCol {
+            width: 10vw;
+        }
+
+        /* Inputs */
+        input[type="text"], input[type="number"] {
+            font-size: 1.4rem;
+            padding: 0.6rem;
+            width: 95%;
+            box-sizing: border-box;
+            border-radius: 0.4rem;
+            border: 0.2rem solid #ccc;
+        }
+
+        #homeTeamName, #awayTeamName {
+            width: 28vw;
+            padding: 0.8rem;
+            font-size: 1.6rem;
+        }
+
+        select {
+            font-size: 1.6rem;
+            padding: 0.8rem;
+        }
+
+        /* Row buttons */
+        table .btn {
+            padding: 0.6rem 1.2rem;
+            font-size: 1.4rem;
+            margin-right: 0.4rem;
+            border-radius: 0.6rem;
+            background: #1e7f1e;
+            color: white;
+            border: 0.2rem solid white;
+            cursor: pointer;
+        }
+
+        /* Main buttons */
+        .btn {
+            padding: 1.2rem 2.4rem;
+            margin-right: 1rem;
+            cursor: pointer;
+            font-size: 2rem;
+            font-weight: bold;
+            border-radius: 0.6rem;
+            background: #1e7f1e;
+            color: white;
+            border: 0.2rem solid white;
+        }
+
+        /* Totals bar */
+        #totalsRow {
+            font-size: 2rem;
+            font-weight: 900;
+            background: #0a2f0a;
+            padding: 1rem;
+            color: #ffffff;
+            border-top: 0.4rem solid white;
+        }
+
+        /* TV MODE */
+        .tv-mode {
+            zoom: 1.18; /* tuned for 48-inch and below */
+        }
+
+        .tv-mode #topControls {
+            display: none !important;
+        }
+
+        .tv-mode #showControlsBtn {
+            display: none !important;
+        }
+
+        .tv-mode #scoreTable {
+            margin-top: 2rem;
+            font-size: 2rem;
+        }
+
+        .tv-mode th, .tv-mode td {
+            padding: 1rem;
+        }
+
+        .tv-mode h2 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Crown Green Bowls Scoreboard</h2>
+
+<button id="exitTvFloating" onclick="exitTvMode()">Exit TV Mode</button>
+<button id="showControlsBtn" onclick="showControls()">Show Controls</button>
+
+<div id="topControls">
+
+    <button id="fullscreenBtn" onclick="toggleFullscreen()">Go Fullscreen</button>
+    <button id="hideControlsBtn" onclick="hideControls()">Hide Controls</button>
+    <button id="tvModeBtn" onclick="enterTvMode()">TV Mode</button>
+    <button id="printBtn" onclick="printMatchSheet()">Print Match Sheet</button>
+
+    <div>
+        <strong>Select Match Type:</strong>
+        <button class="btn" onclick="createGrid(6)">6 Games</button>
+        <button class="btn" onclick="createGrid(8)">8 Games</button>
+        <button class="btn" onclick="createGrid(12)">12 Games</button>
+    </div>
+
+    <br>
+
+    <div>
+        <strong>Home Team Name:</strong>
+        <select id="homeTeamSelect" onchange="updateHomeTeamName()">
+            <option value="Cradley Heath">Cradley Heath</option>
+            <option value="Cradley Heath A">Cradley Heath A</option>
+            <option value="Cradley Heath B">Cradley Heath B</option>
+            <option value="Cradley Heath C">Cradley Heath C</option>
+            <option value="Cradley Heath D">Cradley Heath D</option>
+            <option value="Custom">Custom (type below)</option>
+        </select>
+        <input type="text" id="homeTeamName" value="Cradley Heath" oninput="updateHomeTeamName()">
+    </div>
+
+    <br>
+
+    <div>
+        <strong>Away Team Name:</strong>
+        <input type="text" id="awayTeamName" value="Away Team" oninput="updateAwayTeamName()">
+    </div>
+
+</div>
+
+<table id="scoreTable"></table>
+
+<script>
+let totalHome = 0;
+let totalAway = 0;
+let homeTeamHeading = "Cradley Heath";
+let awayTeamHeading = "Away Team";
+let savedRows = {};
+let lastMatchSize = 6;
+
+/* Hide Controls */
+function hideControls() {
+    document.getElementById("topControls").style.display = "none";
+    document.getElementById("showControlsBtn").style.display = "inline-block";
+}
+
+/* Show Controls */
+function showControls() {
+    document.getElementById("topControls").style.display = "block";
+    document.getElementById("showControlsBtn").style.display = "none";
+}
+
+/* Fullscreen toggle */
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+        document.getElementById("fullscreenBtn").innerText = "Exit Fullscreen";
+    } else {
+        document.exitFullscreen();
+        document.getElementById("fullscreenBtn").innerText = "Go Fullscreen";
+    }
+}
+
+/* Update Home Team Name */
+function updateHomeTeamName() {
+    let dropdown = document.getElementById("homeTeamSelect").value;
+    let textBox = document.getElementById("homeTeamName");
+
+    if (dropdown === "Custom") {
+        homeTeamHeading = textBox.value;
+    } else {
+        homeTeamHeading = dropdown;
+        textBox.value = dropdown;
+    }
+
+    let headingCell = document.getElementById("homeHeadingCell");
+    if (headingCell) headingCell.innerText = homeTeamHeading;
+}
+
+/* Update Away Team Name */
+function updateAwayTeamName() {
+    awayTeamHeading = document.getElementById("awayTeamName").value;
+
+    let headingCell = document.getElementById("awayHeadingCell");
+    if (headingCell) headingCell.innerText = awayTeamHeading;
+}
+
+/* Create Match Grid */
+function createGrid(games) {
+
+    if (homeTeamHeading.trim() === "" || awayTeamHeading.trim() === "") {
+        alert("Please enter both Home and Away team names before starting a match.");
+        return;
+    }
+
+    lastMatchSize = games;
+    totalHome = 0;
+    totalAway = 0;
+    savedRows = {};
+
+    document.getElementById("topControls").style.display = "none";
+    document.getElementById("showControlsBtn").style.display = "inline-block";
+
+    let table = document.getElementById("scoreTable");
+    table.innerHTML = `
+        <tr>
+            <th>Game</th>
+            <th id="homeHeadingCell">${homeTeamHeading}</th>
+            <th class="scoreCol">Home</th>
+            <th id="awayHeadingCell">${awayTeamHeading}</th>
+            <th class="scoreCol">Away</th>
+            <th>Actions</th>
+        </tr>
+    `;
+
+    for (let i = 1; i <= games; i++) {
+        table.innerHTML += `
+            <tr id="row${i}">
+                <td>${i}</td>
+                <td><input type="text" id="homePlayer${i}" placeholder="Home Player"></td>
+                <td><input type="number" id="homeScore${i}" min="0"></td>
+                <td><input type="text" id="awayPlayer${i}" placeholder="Away Player"></td>
+                <td><input type="number" id="awayScore${i}" min="0"></td>
+                <td>
+                    <button onclick="saveScore(${i})" class="btn">Save</button>
+                    <button onclick="clearRow(${i})" class="btn">Clear</button>
+                </td>
+            </tr>
+        `;
+    }
+
+    table.innerHTML += `
+        <tr>
+            <td colspan="6" id="totalsRow">Running Totals: Home: 0 &nbsp;&nbsp;&nbsp; Away: 0</td>
+        </tr>
+        <tr>
+            <td colspan="6" style="text-align:center;">
+                <button onclick="resetMatch()" class="btn">Reset Match</button>
+            </td>
+        </tr>
+    `;
+}
+
+/* Save Score */
 function saveScore(game) {
     if (savedRows[game]) return;
 
