@@ -1,499 +1,669 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Crown Green Bowls Scoreboard</title>
+    <meta charset="UTF-8">
+    <title>Cradley Heath Bowls Scoreboard - Rev 5.3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            padding: 20px; 
-            background: #0b3d0b;
-            color: #fff;
-            font-size: 22px;
+        :root {
+            --bg-main: #004400;
+            --bg-panel: #006600;
+            --bg-header: #003300;
+            --text-main: #ffffff;
+            --accent: #ffcc00;
+            --danger: #ff4444;
+            --button-bg: #008800;
+            --button-bg-alt: #0055aa;
+            --button-text: #ffffff;
+            --border-color: #ffffff;
         }
 
-        h2 {
-            font-size: 3rem;
-            font-weight: 900;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #002200;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        /* ====== SCALING WRAPPER FOR TV / LARGE SCREENS ====== */
+        .scoreboard-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .scoreboard-scale-container {
+            transform-origin: top center;
+            /* default: no scale on phones */
+            transform: scale(1);
+        }
+
+        /* 4K and very large displays */
+        @media (min-width: 2500px) {
+            .scoreboard-scale-container {
+                transform: scale(0.7);
+            }
+        }
+
+        /* 1080p–4K range */
+        @media (min-width: 1600px) and (max-width: 2499px) {
+            .scoreboard-scale-container {
+                transform: scale(0.8);
+            }
+        }
+
+        /* Smaller TVs / large laptops */
+        @media (min-width: 1200px) and (max-width: 1599px) {
+            .scoreboard-scale-container {
+                transform: scale(0.9);
+            }
+        }
+
+        /* Slightly wide tablets / small laptops */
+        @media (min-width: 1000px) and (max-width: 1199px) {
+            .scoreboard-scale-container {
+                transform: scale(0.95);
+            }
+        }
+
+        /* ====== MAIN LAYOUT ====== */
+
+        .scoreboard-container {
+            background-color: var(--bg-main);
+            border: 4px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        .header {
+            background-color: var(--bg-header);
+            padding: 10px;
             text-align: center;
-            margin-bottom: 20px;
-            color: #ffffff;
+            border-radius: 6px;
+            margin-bottom: 10px;
         }
 
-        /* Top control buttons */
-        #fullscreenBtn,
-        #hideControlsBtn,
-        #tvModeBtn,
-        #printBtn {
-            padding: 15px 30px;
-            font-size: 1.4rem;
+        .header h1 {
+            font-size: 2rem;
+            color: var(--accent);
+        }
+
+        .top-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-controls-left,
+        .top-controls-right {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .btn-alt {
+            background-color: var(--button-bg-alt);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+
+        .panel {
+            background-color: var(--bg-panel);
+            border-radius: 6px;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .panel h2 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            text-align: center;
+            color: var(--accent);
+        }
+
+        .teams-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .team-box {
+            background-color: #004d00;
+            border-radius: 6px;
+            padding: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .team-name {
+            font-size: 1.1rem;
             font-weight: bold;
-            background: #1e7f1e;
-            color: white;
-            border: 2px solid white;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            margin-right: 10px;
+            text-align: center;
+            margin-bottom: 5px;
         }
 
-        /* Floating Exit TV Mode button (TV Mode only) */
-        #exitTvFloating {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            font-size: 1.4rem;
-            font-weight: bold;
-            background: #b22222;
-            color: white;
-            border: 2px solid white;
-            border-radius: 10px;
-            cursor: pointer;
-            display: none;
-            z-index: 99999;
+        .score-display {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 5px;
         }
 
-        /* Floating Show Controls button */
-        #showControlsBtn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            font-size: 1.4rem;
-            background: #1e7f1e;
-            color: white;
-            border: 2px solid white;
-            border-radius: 8px;
-            cursor: pointer;
-            display: none;
-            z-index: 9999;
+        .end-display {
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 5px;
         }
 
-        /* Compact table layout */
-        table {
+        .score-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .score-btn {
+            min-width: 40px;
+            padding: 4px 6px;
+            font-size: 0.9rem;
+        }
+
+        .ends-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .ends-box {
+            flex: 1;
+            background-color: #004d00;
+            border-radius: 6px;
+            padding: 8px;
+            border: 2px solid var(--border-color);
+            text-align: center;
+        }
+
+        .ends-box span {
+            display: block;
+            font-size: 1rem;
+        }
+
+        .ends-box .value {
+            font-size: 1.5rem;
+            margin-top: 4px;
+        }
+
+        .info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .info-box {
+            flex: 1;
+            background-color: #004d00;
+            border-radius: 6px;
+            padding: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .info-box label {
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .info-box input,
+        .info-box select {
+            width: 100%;
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+        }
+
+        .right-panel-section {
+            margin-bottom: 10px;
+        }
+
+        .right-panel-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .summary-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 1.4rem;
-            background: #145214;
+            font-size: 0.85rem;
         }
 
-        table, th, td {
-            border: 2px solid #fff;
-        }
-
-        th, td {
-            padding: 6px;
+        .summary-table th,
+        .summary-table td {
+            border: 1px solid #ffffff;
+            padding: 4px;
             text-align: center;
         }
 
-        th {
-            background: #1e7f1e;
-            color: white;
+        .summary-table th {
+            background-color: #003300;
         }
 
-        .scoreCol {
-            width: 70px;
+        .highlight {
+            background-color: #228822;
         }
 
-        /* Compact inputs */
-        input[type="text"], input[type="number"] {
-            font-size: 1.4rem;
-            padding: 6px;
-            width: 95%;
-            box-sizing: border-box;
-            border-radius: 6px;
-            border: 2px solid #ccc;
+        .footer-controls {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        #homeTeamName, #awayTeamName {
-            width: 350px;
-            padding: 10px;
-            font-size: 1.8rem;
+        .footer-left,
+        .footer-right {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
         }
 
-        select {
-            font-size: 1.8rem;
-            padding: 10px;
+        .status-text {
+            font-size: 0.9rem;
         }
 
-        /* Compact row buttons */
-        table .btn {
-            padding: 10px 20px;
-            font-size: 1.4rem;
-            margin-right: 5px;
-            border-radius: 10px;
-            background: #1e7f1e;
-            color: white;
-            border: 2px solid white;
-            cursor: pointer;
+        /* TV MODE CLASS (kept same position for Exit button etc.) */
+        .tv-mode .scoreboard-container {
+            border-width: 6px;
         }
 
-        /* Big main buttons stay large */
-        .btn {
-            padding: 20px 40px;
-            margin-right: 15px;
-            cursor: pointer;
-            font-size: 2rem;
-            font-weight: bold;
-            border-radius: 10px;
-            background: #1e7f1e;
-            color: white;
-            border: 2px solid white;
+        .tv-mode .header h1 {
+            font-size: 2.4rem;
         }
 
-        /* Summary bar */
-        #totalsRow {
-            font-size: 2rem;
-            font-weight: 900;
-            background: #0a2f0a;
-            padding: 15px;
-            color: #ffffff;
-            border-top: 4px solid white;
+        .tv-mode .score-display {
+            font-size: 3rem;
         }
 
-        /* TV MODE STYLES */
-        .tv-mode body {
-            background: #000000;
+        .tv-mode .team-name {
+            font-size: 1.3rem;
         }
 
-        .tv-mode #topControls {
-            display: none !important;
+        .tv-mode .summary-table {
+            font-size: 0.9rem;
         }
 
-        .tv-mode #showControlsBtn {
-            display: none !important;
+        /* Responsive tweaks for smaller devices */
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
-        .tv-mode #scoreTable {
-            margin-top: 40px;
-            font-size: 2rem;
-        }
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.6rem;
+            }
 
-        .tv-mode th, .tv-mode td {
-            padding: 12px;
-        }
+            .score-display {
+                font-size: 2rem;
+            }
 
-        .tv-mode h2 {
-            font-size: 4rem;
-            margin-bottom: 10px;
+            .top-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .footer-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
-
 <body>
+<div class="scoreboard-wrapper">
+    <div class="scoreboard-scale-container" id="scaleContainer">
+        <div class="scoreboard-container" id="scoreboard">
 
-<h2>Crown Green Bowls Scoreboard</h2>
+            <div class="header">
+                <h1>Cradley Heath Bowls Scoreboard</h1>
+            </div>
 
-<!-- Floating Exit TV Mode button (TV Mode only) -->
-<button id="exitTvFloating" onclick="exitTvMode()">Exit TV Mode</button>
+            <div class="top-controls">
+                <div class="top-controls-left">
+                    <button class="btn btn-alt" id="tvModeBtn">TV Mode</button>
+                    <button class="btn btn-danger" id="exitTvModeBtn">Exit TV Mode</button>
+                    <button class="btn" id="resetBtn">Reset Match</button>
+                </div>
+                <div class="top-controls-right">
+                    <span class="status-text" id="statusText">Ready</span>
+                </div>
+            </div>
 
-<!-- Floating Show Controls button -->
-<button id="showControlsBtn" onclick="showControls()">Show Controls</button>
+            <div class="main-grid">
+                <!-- LEFT PANEL -->
+                <div class="panel">
+                    <h2>Match Score</h2>
 
-<!-- All controls wrapped together -->
-<div id="topControls">
+                    <div class="teams-row">
+                        <div class="team-box" id="homeBox">
+                            <div class="team-name" id="homeName">Home</div>
+                            <div class="score-display" id="homeScore">0</div>
+                            <div class="end-display">Ends: <span id="homeEnds">0</span></div>
+                            <div class="score-buttons">
+                                <button class="btn score-btn" data-team="home" data-score="1">+1</button>
+                                <button class="btn score-btn" data-team="home" data-score="2">+2</button>
+                                <button class="btn score-btn" data-team="home" data-score="3">+3</button>
+                                <button class="btn score-btn" data-team="home" data-score="4">+4</button>
+                                <button class="btn score-btn" data-team="home" data-score="-1">-1</button>
+                            </div>
+                        </div>
 
-    <!-- Top buttons -->
-    <button id="fullscreenBtn" onclick="toggleFullscreen()">Go Fullscreen</button>
-    <button id="hideControlsBtn" onclick="hideControls()">Hide Controls</button>
-    <button id="tvModeBtn" onclick="enterTvMode()">TV Mode</button>
-    <button id="printBtn" onclick="printMatchSheet()">Print Match Sheet</button>
+                        <div class="team-box" id="awayBox">
+                            <div class="team-name" id="awayName">Away</div>
+                            <div class="score-display" id="awayScore">0</div>
+                            <div class="end-display">Ends: <span id="awayEnds">0</span></div>
+                            <div class="score-buttons">
+                                <button class="btn score-btn" data-team="away" data-score="1">+1</button>
+                                <button class="btn score-btn" data-team="away" data-score="2">+2</button>
+                                <button class="btn score-btn" data-team="away" data-score="3">+3</button>
+                                <button class="btn score-btn" data-team="away" data-score="4">+4</button>
+                                <button class="btn score-btn" data-team="away" data-score="-1">-1</button>
+                            </div>
+                        </div>
+                    </div>
 
-    <div>
-        <strong>Select Match Type:</strong>
-        <button class="btn" onclick="createGrid(6)">6 Games</button>
-        <button class="btn" onclick="createGrid(8)">8 Games</button>
-        <button class="btn" onclick="createGrid(12)">12 Games</button>
+                    <div class="ends-row">
+                        <div class="ends-box">
+                            <span>Total Ends</span>
+                            <span class="value" id="totalEnds">0</span>
+                        </div>
+                        <div class="ends-box">
+                            <span>Current End</span>
+                            <span class="value" id="currentEnd">0</span>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-box">
+                            <label for="homeNameInput">Home Team Name</label>
+                            <input type="text" id="homeNameInput" placeholder="Enter home team name">
+                        </div>
+                        <div class="info-box">
+                            <label for="awayNameInput">Away Team Name</label>
+                            <input type="text" id="awayNameInput" placeholder="Enter away team name">
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-box">
+                            <label for="competitionInput">Competition</label>
+                            <input type="text" id="competitionInput" placeholder="League / Cup / Friendly">
+                        </div>
+                        <div class="info-box">
+                            <label for="greenInput">Green / Rink</label>
+                            <input type="text" id="greenInput" placeholder="e.g. A Green, Rink 3">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL -->
+                <div class="panel">
+                    <div class="right-panel-section">
+                        <h2>Summary</h2>
+                        <table class="summary-table" id="summaryTable">
+                            <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th>Score</th>
+                                <th>Ends</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr id="homeSummaryRow">
+                                <td id="homeSummaryName">Home</td>
+                                <td id="homeSummaryScore">0</td>
+                                <td id="homeSummaryEnds">0</td>
+                            </tr>
+                            <tr id="awaySummaryRow">
+                                <td id="awaySummaryName">Away</td>
+                                <td id="awaySummaryScore">0</td>
+                                <td id="awaySummaryEnds">0</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="right-panel-section">
+                        <h2>Match Info</h2>
+                        <div class="info-box">
+                            <label for="dateInput">Date</label>
+                            <input type="date" id="dateInput">
+                        </div>
+                        <div class="info-box" style="margin-top: 6px;">
+                            <label for="notesInput">Notes</label>
+                            <input type="text" id="notesInput" placeholder="Any special notes">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-controls">
+                <div class="footer-left">
+                    <button class="btn" id="prevEndBtn">Previous End</button>
+                    <button class="btn" id="nextEndBtn">Next End</button>
+                </div>
+                <div class="footer-right">
+                    <span class="status-text" id="winnerText">No winner yet</span>
+                </div>
+            </div>
+
+        </div>
     </div>
-
-    <br>
-
-    <div>
-        <strong>Home Team Name:</strong>
-        <select id="homeTeamSelect" onchange="updateHomeTeamName()">
-            <option value="Cradley Heath">Cradley Heath</option>
-            <option value="Cradley Heath A">Cradley Heath A</option>
-            <option value="Cradley Heath B">Cradley Heath B</option>
-            <option value="Cradley Heath C">Cradley Heath C</option>
-            <option value="Cradley Heath D">Cradley Heath D</option>
-            <option value="Custom">Custom (type below)</option>
-        </select>
-        <input type="text" id="homeTeamName" value="Cradley Heath" oninput="updateHomeTeamName()">
-    </div>
-
-    <br>
-
-    <div>
-        <strong>Away Team Name:</strong>
-        <input type="text" id="awayTeamName" value="Away Team" oninput="updateAwayTeamName()">
-    </div>
-
 </div>
 
-<table id="scoreTable"></table>
-
 <script>
-let totalHome = 0;
-let totalAway = 0;
-let homeTeamHeading = "Cradley Heath";
-let awayTeamHeading = "Away Team";
-let savedRows = {};
-let lastMatchSize = 6;
+    // Basic state
+    let homeScore = 0;
+    let awayScore = 0;
+    let homeEnds = 0;
+    let awayEnds = 0;
+    let totalEnds = 0;
+    let currentEnd = 0;
 
-/* Hide Controls */
-function hideControls() {
-    document.getElementById("topControls").style.display = "none";
-    document.getElementById("showControlsBtn").style.display = "inline-block";
-}
+    const homeScoreEl = document.getElementById('homeScore');
+    const awayScoreEl = document.getElementById('awayScore');
+    const homeEndsEl = document.getElementById('homeEnds');
+    const awayEndsEl = document.getElementById('awayEnds');
+    const totalEndsEl = document.getElementById('totalEnds');
+    const currentEndEl = document.getElementById('currentEnd');
 
-/* Show Controls */
-function showControls() {
-    document.getElementById("topControls").style.display = "block";
-    document.getElementById("showControlsBtn").style.display = "none";
-}
+    const homeNameEl = document.getElementById('homeName');
+    const awayNameEl = document.getElementById('awayName');
 
-/* Fullscreen toggle */
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-        document.getElementById("fullscreenBtn").innerText = "Exit Fullscreen";
-    } else {
-        document.exitFullscreen();
-        document.getElementById("fullscreenBtn").innerText = "Go Fullscreen";
-    }
-}
+    const homeNameInput = document.getElementById('homeNameInput');
+    const awayNameInput = document.getElementById('awayNameInput');
+    const competitionInput = document.getElementById('competitionInput');
+    const greenInput = document.getElementById('greenInput');
+    const dateInput = document.getElementById('dateInput');
+    const notesInput = document.getElementById('notesInput');
 
-/* Update Home Team Name */
-function updateHomeTeamName() {
-    let dropdown = document.getElementById("homeTeamSelect").value;
-    let textBox = document.getElementById("homeTeamName");
+    const homeSummaryRow = document.getElementById('homeSummaryRow');
+    const awaySummaryRow = document.getElementById('awaySummaryRow');
+    const homeSummaryName = document.getElementById('homeSummaryName');
+    const awaySummaryName = document.getElementById('awaySummaryName');
+    const homeSummaryScore = document.getElementById('homeSummaryScore');
+    const awaySummaryScore = document.getElementById('awaySummaryScore');
+    const homeSummaryEnds = document.getElementById('homeSummaryEnds');
+    const awaySummaryEnds = document.getElementById('awaySummaryEnds');
 
-    if (dropdown === "Custom") {
-        homeTeamHeading = textBox.value;
-    } else {
-        homeTeamHeading = dropdown;
-        textBox.value = dropdown;
-    }
+    const statusText = document.getElementById('statusText');
+    const winnerText = document.getElementById('winnerText');
 
-    let headingCell = document.getElementById("homeHeadingCell");
-    if (headingCell) headingCell.innerText = homeTeamHeading;
-}
+    const tvModeBtn = document.getElementById('tvModeBtn');
+    const exitTvModeBtn = document.getElementById('exitTvModeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const prevEndBtn = document.getElementById('prevEndBtn');
+    const nextEndBtn = document.getElementById('nextEndBtn');
 
-/* Update Away Team Name */
-function updateAwayTeamName() {
-    awayTeamHeading = document.getElementById("awayTeamName").value;
+    const scoreboard = document.getElementById('scoreboard');
 
-    let headingCell = document.getElementById("awayHeadingCell");
-    if (headingCell) headingCell.innerText = awayTeamHeading;
-}
+    function updateDisplay() {
+        homeScoreEl.textContent = homeScore;
+        awayScoreEl.textContent = awayScore;
+        homeEndsEl.textContent = homeEnds;
+        awayEndsEl.textContent = awayEnds;
+        totalEndsEl.textContent = totalEnds;
+        currentEndEl.textContent = currentEnd;
 
-/* Create Match Grid */
-function createGrid(games) {
+        homeSummaryScore.textContent = homeScore;
+        awaySummaryScore.textContent = awayScore;
+        homeSummaryEnds.textContent = homeEnds;
+        awaySummaryEnds.textContent = awayEnds;
 
-    if (homeTeamHeading.trim() === "" || awayTeamHeading.trim() === "") {
-        alert("Please enter both Home and Away team names before starting a match.");
-        return;
-    }
+        // Highlight winner
+        homeSummaryRow.classList.remove('highlight');
+        awaySummaryRow.classList.remove('highlight');
 
-    lastMatchSize = games;
-    totalHome = 0;
-    totalAway = 0;
-    savedRows = {};
-
-    document.getElementById("topControls").style.display = "none";
-    document.getElementById("showControlsBtn").style.display = "inline-block";
-
-    let table = document.getElementById("scoreTable");
-    table.innerHTML = `
-        <tr>
-            <th>Game</th>
-            <th id="homeHeadingCell">${homeTeamHeading}</th>
-            <th class="scoreCol">Home</th>
-            <th id="awayHeadingCell">${awayTeamHeading}</th>
-            <th class="scoreCol">Away</th>
-            <th>Actions</th>
-        </tr>
-    `;
-
-    for (let i = 1; i <= games; i++) {
-        table.innerHTML += `
-            <tr id="row${i}">
-                <td>${i}</td>
-                <td><input type="text" id="homePlayer${i}" placeholder="Home Player"></td>
-                <td><input type="number" id="homeScore${i}" min="0"></td>
-                <td><input type="text" id="awayPlayer${i}" placeholder="Away Player"></td>
-                <td><input type="number" id="awayScore${i}" min="0"></td>
-                <td>
-                    <button onclick="saveScore(${i})" class="btn">Save</button>
-                    <button onclick="clearRow(${i})" class="btn">Clear</button>
-                </td>
-            </tr>
-        `;
-    }
-
-    table.innerHTML += `
-        <tr>
-            <td colspan="6" id="totalsRow">Running Totals: Home: 0 &nbsp;&nbsp;&nbsp; Away: 0</td>
-        </tr>
-        <tr>
-            <td colspan="6" style="text-align:center;">
-                <button onclick="resetMatch()" class="btn">Reset Match</button>
-            </td>
-        </tr>
-    `;
-}
-
-/* Save Score with auto-highlight */
-function saveScore(game) {
-    if (savedRows[game]) return;
-
-    let home = parseInt(document.getElementById("homeScore" + game).value) || 0;
-    let away = parseInt(document.getElementById("awayScore" + game).value) || 0;
-
-    if (home < 21 && away < 21) {
-        if (home > away) away = 21;
-        else if (away > home) home = 21;
-    }
-
-    totalHome += home;
-    totalAway += away;
-    savedRows[game] = true;
-
-    let row = document.getElementById("row" + game);
-
-    if (home > away) {
-        row.style.backgroundColor = "#2e8b57";
-    } else if (away > home) {
-        row.style.backgroundColor = "#1e90ff";
-    } else {
-        row.style.backgroundColor = "#145214";
-    }
-
-    document.getElementById("totalsRow").innerHTML =
-        `Running Totals: Home: ${totalHome} &nbsp;&nbsp;&nbsp; Away: ${totalAway}`;
-}
-
-/* Clear Row */
-function clearRow(game) {
-    if (savedRows[game]) {
-        let home = parseInt(document.getElementById("homeScore" + game).value) || 0;
-        let away = parseInt(document.getElementById("awayScore" + game).value) || 0;
-
-        if (home < 21 && away < 21) {
-            if (home > away) away = 21;
-            else if (away > home) home = 21;
+        if (homeScore > awayScore) {
+            homeSummaryRow.classList.add('highlight');
+            winnerText.textContent = (homeNameInput.value || 'Home') + ' leading';
+        } else if (awayScore > homeScore) {
+            awaySummaryRow.classList.add('highlight');
+            winnerText.textContent = (awayNameInput.value || 'Away') + ' leading';
+        } else if (homeScore === 0 && awayScore === 0) {
+            winnerText.textContent = 'No winner yet';
+        } else {
+            winnerText.textContent = 'Scores level';
         }
-
-        totalHome -= home;
-        totalAway -= away;
-        delete savedRows[game];
     }
 
-    document.getElementById("homePlayer" + game).value = "";
-    document.getElementById("awayPlayer" + game).value = "";
-    document.getElementById("homeScore" + game).value = "";
-    document.getElementById("awayScore" + game).value = "";
-
-    document.getElementById("row" + game).style.backgroundColor = "#145214";
-
-    document.getElementById("totalsRow").innerHTML =
-        `Running Totals: Home: ${totalHome} &nbsp;&nbsp;&nbsp; Away: ${totalAway}`;
-}
-
-/* Reset Match */
-function resetMatch() {
-    totalHome = 0;
-    totalAway = 0;
-    savedRows = {};
-
-    document.getElementById("topControls").style.display = "block";
-    document.getElementById("showControlsBtn").style.display = "none";
-
-    createGrid(lastMatchSize);
-}
-
-/* TV MODE */
-function enterTvMode() {
-    document.documentElement.classList.add("tv-mode");
-    document.getElementById("exitTvFloating").style.display = "inline-block";
-}
-
-function exitTvMode() {
-    document.documentElement.classList.remove("tv-mode");
-    document.getElementById("exitTvFloating").style.display = "none";
-}
-
-/* Printable Match Sheet */
-function printMatchSheet() {
-    if (!document.getElementById("scoreTable").innerHTML.trim()) {
-        alert("Please create a match grid before printing.");
-        return;
+    function addScore(team, value) {
+        if (team === 'home') {
+            homeScore += value;
+            if (homeScore < 0) homeScore = 0;
+            if (value > 0) {
+                homeEnds++;
+                totalEnds++;
+                currentEnd = totalEnds;
+            }
+        } else {
+            awayScore += value;
+            if (awayScore < 0) awayScore = 0;
+            if (value > 0) {
+                awayEnds++;
+                totalEnds++;
+                currentEnd = totalEnds;
+            }
+        }
+        statusText.textContent = 'Score updated';
+        updateDisplay();
     }
 
-    let win = window.open("", "PrintMatch", "width=900,height=700");
-    let now = new Date().toLocaleString();
+    document.querySelectorAll('.score-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const team = btn.getAttribute('data-team');
+            const score = parseInt(btn.getAttribute('data-score'), 10);
+            addScore(team, score);
+        });
+    });
 
-    let html = `
-        <html>
-        <head>
-            <title>Match Sheet</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    padding: 20px;
-                    background: #ffffff;
-                    color: #000000;
-                    font-size: 14px;
-                }
-                h2 {
-                    text-align: center;
-                    font-size: 24px;
-                    margin-bottom: 5px;
-                }
-                h3 {
-                    text-align: center;
-                    font-size: 18px;
-                    margin-top: 0;
-                    margin-bottom: 20px;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 10px;
-                    font-size: 14px;
-                }
-                table, th, td {
-                    border: 1px solid #000;
-                }
-                th, td {
-                    padding: 6px;
-                    text-align: center;
-                }
-                #totalsRow {
-                    font-weight: bold;
-                }
-            </style>
-        </head>
-        <body>
-            <h2>Crown Green Bowls Match Sheet</h2>
-            <h3>${homeTeamHeading} vs ${awayTeamHeading}</h3>
-            <p><strong>Date/Time:</strong> ${now}</p>
-            <table>
-                ${document.getElementById("scoreTable").innerHTML}
-            </table>
-        </body>
-        </html>
-    `;
+    homeNameInput.addEventListener('input', () => {
+        const name = homeNameInput.value || 'Home';
+        homeNameEl.textContent = name;
+        homeSummaryName.textContent = name;
+    });
 
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-    win.focus();
-    win.print();
-}
+    awayNameInput.addEventListener('input', () => {
+        const name = awayNameInput.value || 'Away';
+        awayNameEl.textContent = name;
+        awaySummaryName.textContent = name;
+    });
+
+    resetBtn.addEventListener('click', () => {
+        if (!confirm('Reset the match?')) return;
+        homeScore = 0;
+        awayScore = 0;
+        homeEnds = 0;
+        awayEnds = 0;
+        totalEnds = 0;
+        currentEnd = 0;
+        statusText.textContent = 'Match reset';
+        winnerText.textContent = 'No winner yet';
+        updateDisplay();
+    });
+
+    prevEndBtn.addEventListener('click', () => {
+        if (currentEnd > 0) {
+            currentEnd--;
+            statusText.textContent = 'Viewing previous end';
+            currentEndEl.textContent = currentEnd;
+        }
+    });
+
+    nextEndBtn.addEventListener('click', () => {
+        if (currentEnd < totalEnds) {
+            currentEnd++;
+            statusText.textContent = 'Viewing next end';
+            currentEndEl.textContent = currentEnd;
+        }
+    });
+
+    tvModeBtn.addEventListener('click', () => {
+        document.body.classList.add('tv-mode');
+        statusText.textContent = 'TV Mode ON';
+    });
+
+    exitTvModeBtn.addEventListener('click', () => {
+        document.body.classList.remove('tv-mode');
+        statusText.textContent = 'TV Mode OFF';
+    });
+
+    // Initial display
+    updateDisplay();
 </script>
-
 </body>
 </html>
